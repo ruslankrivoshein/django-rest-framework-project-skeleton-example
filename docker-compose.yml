@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: main_nginx
+    restart: always
+    ports:
+     - 80:80
+     - 443:443
+    volumes:
+     - ./conf.d/nginx/conf.d/:/etc/nginx/conf.d/
+     - ./conf.d/nginx/ssl/:/etc/ssl/
+     - ./docker/nginx/:/var/log/nginx/
+     - ./main/static/:/usr/src/app/main/static/
+
+  postgres:
+    image: postgres:latest
+    container_name: main_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=main
+    volumes:
+      - main_postgres:/var/lib/postgresql/data/
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: main_pgadmin
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@mail.com
+      - PGADMIN_DEFAULT_PASSWORD=123
+    volumes:
+      - ./docker/pgadmin/:/var/lib/pgadmin/
+
+  portainer:
+    image: portainer/portainer:latest
+    container_name: main_portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/portainer/:/data/
+
+  app:
+    build: .
+    container_name: main_app
+    restart: always
+    volumes:
+      - ./main/:/usr/src/app/main/
+      - type: bind
+        source: ./.env
+        target: /usr/src/app/.env
+        read_only: true
+      - type: bind
+        source: ./manage.py
+        target: /usr/src/app/manage.py
+        read_only: true
+
+volumes:
+  main_postgres:
+    external: true

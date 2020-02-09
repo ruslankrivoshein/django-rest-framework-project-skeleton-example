@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
 
-    'main.core',
+    'main.core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
